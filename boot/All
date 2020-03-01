@@ -1,0 +1,11 @@
+[main]
+@type = bundle
+@description = "First service called to start the system"
+@user = ( root )
+@contents = 
+(
+all-Mount
+all-System
+all-Local
+all-Runtime
+)

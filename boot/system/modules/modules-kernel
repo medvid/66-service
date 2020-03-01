@@ -1,0 +1,23 @@
+[main]
+@type = oneshot
+@description = "Load kernel modules"
+@user = ( root )
+@depends = ( 00 )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [modules-kernel] starts... }
+	foreground
+	{
+		pipeline -d { kmod static-nodes --format=devname }
+		pipeline { s6-cut -d" " -f1 }
+		forstdin -pd "\n" -- mod
+		importas -iu -D "" mod mod
+		modprobe $mod
+	}
+	importas -u ? ?
+	if { test ${?} == 0 }   
+	66-echo -- [modules-kernel] started successfully
+)

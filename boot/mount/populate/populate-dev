@@ -1,0 +1,41 @@
+[main]
+@type = oneshot
+@description = "Populate /dev directory"
+@user = ( root )
+@depends = ( mount-dev )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [populate-dev] starts... }
+	foreground {
+		if -t { grep -Fq hugetlbfs /proc/filesystems }
+		if -nt { mountpoint -q /dev/hugepages }
+		if { mkdir -p /dev/hugepages }
+		mount -o noatime,nodev,noexec,nosuid -t hugetlbfs hugepages /dev/hugepages
+	}
+	foreground {
+		if -t { grep -Fq mqueue /proc/filesystems }
+		if -nt { mountpoint -q /dev/mqueue }
+		if { mkdir -p /dev/mqueue }
+		mount -o noatime,nodev,noexec,nosuid -t mqueue mqueue /dev/mqueue
+	}
+	66-echo -- [populate-dev] started successfully
+)
+
+[stop]
+@build=auto
+@execute=
+(
+	if { 66-echo -- [populate-dev] stop... }
+	forx -p dir { 
+		/dev/hugepages /dev/mqueue
+	}
+	importas -ui dir dir
+	foreground {
+		if -t { mountpoint -q ${dir} }
+		umount ${dir}
+	}
+	66-echo -- [populate-dev] stopped successfully
+)

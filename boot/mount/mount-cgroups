@@ -1,0 +1,45 @@
+[main]
+@type = oneshot
+@description = "mount cgroups hierarchy"
+@options = ( env )
+@user = ( root )
+@depends = ( mount-dev )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${CGROUPS} = yes }
+	{
+		foreground
+		{	
+			if { 66-echo -- [mount-cgroups] starts... }
+			if { mkdir -p -m 0755 /sys/fs/cgroup }
+			if { mount -t tmpfs cgroup /sys/fs/cgroup }
+			if { mkdir -p -m 0755 /sys/fs/cgroup/unified }
+			if { mount -t cgroup2 -o rw,nosuid,nodev,noexec,relatime,nsdelegate cgroup2 /sys/fs/cgroup/unified }
+			redirfd -r 0 /proc/cgroups
+			pipeline { s6-tail -n +2 }
+			pipeline { s6-cut -d"\t" -f1 }
+			forstdin -d"\n" -- i
+			importas -iu i i
+			if { s6-mkdir /sys/fs/cgroup/${i} }
+			mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,${i} cgroup /sys/fs/cgroup/${i}
+		}
+		66-echo -- [mount-cgroups] started successfully
+	}
+	66-echo -- [mount-cgroups] deactivated
+)
+
+[stop]
+@build=auto
+@execute=
+(
+	if { 66-echo -- [mount-cgroups] stops... }
+	if { umount -R /sys/fs/cgroup }
+	66-echo -- [mount-cgroups] stopped successfully
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

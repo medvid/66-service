@@ -1,0 +1,25 @@
+[main]
+@type = oneshot
+@description = "Set font and keymap for tty"
+@user = ( root )
+@options = ( env )
+@depends = ( udevadm )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [system-fontnkey] starts... }
+	execl-envfile ${conf_file}
+	background
+	{
+		forbacktickx index { seq 12 }
+		importas -u -D "" index index
+		sh -c "setfont ${FONT_MAP:+-m $FONT_MAP} ${FONT_UNIMAP:+-u $FONT_UNIMAP} $FONT -C /dev/tty${index}"
+	}
+	if { loadkeys -q -u ${KEYMAP} } 
+	66-echo -- [system-fontnkey] started successfully
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

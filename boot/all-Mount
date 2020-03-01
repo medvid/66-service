@@ -1,0 +1,5 @@
+[main]
+@type = bundle
+@description = "Mount all devices"
+@user = ( root )
+@contents = ( 00 )

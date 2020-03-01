@@ -1,0 +1,18 @@
+[main]
+@type = oneshot
+@description = "Set hostname"
+@user = ( root )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [system-hostname] starts... }
+	execl-envfile ${conf_file}
+	if { s6-hostname ${HOSTNAME} }
+	66-echo -- [system-hostname] started successfully
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

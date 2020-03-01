@@ -1,0 +1,30 @@
+[main]
+@type = oneshot
+@description = "Create tempory authentification files"
+@depends = ( mount-rw )
+@user = ( root )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [local-authfiles] starts... }
+	if -t {
+		if -nt { s6-test -e ${script_file_wtmp} }
+		foreground { 
+			install -m0664 -o root -g utmp /dev/null ${WTMP}
+		}
+	}
+	if -t {
+		if -nt { s6-test -e ${script_file_btmp} }
+		foreground {
+			install -m0600 -o root -g utmp /dev/null ${BTMP}
+		}
+	}
+	66-echo -- [local-authfiles] started successfully
+)
+
+[environment]
+script_file_wtmp=!/var/log/wtmp
+script_file_btmp=!/var/log/btmp

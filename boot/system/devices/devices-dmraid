@@ -1,0 +1,23 @@
+[main]
+@type = oneshot
+@description = "Active dmraid devices"
+@user = ( root )
+@options = ( env )
+@depends = ( udevadm )
+
+[start]
+@build = auto
+@execute = (
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test $DMRAID = yes }
+	{
+		if { 66-echo -- [devices-dmraid] starts... }
+		if { 66-which -q dmraid }
+		if { dmraid -i -ay }
+		66-echo -- [devices-dmraid] started successfully
+	}
+	66-echo -- [devices-dmraid] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

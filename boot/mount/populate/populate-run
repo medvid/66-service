@@ -1,0 +1,24 @@
+[main]
+@type = oneshot
+@description = "Populate /run directory"
+@user = ( root )
+@depends = ( mount-run )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [populate-run] starts... }
+	if 
+	{
+		forx -p dir { lvm user lock }
+		importas -ui dir dir
+		foreground
+		{
+			if -n { s6-test -d /run/${dir} }
+			s6-mkdir -p -m 0755 /run/${dir}
+		}
+	}
+	if { install -m0664 -o root -g utmp /dev/null /run/utmp }
+	66-echo -- [populate-run] started successfully
+)

@@ -1,0 +1,18 @@
+[main]
+@type = bundle
+@description = "Local configuration"
+@user = ( root )
+@contents = 
+(
+mount-rw
+mount-swap
+local-iptables
+local-ip6tables
+local-loop
+local-sethostname
+local-time
+local-authfiles
+local-tmpfiles
+local-rc
+local-dmesg
+)

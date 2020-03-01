@@ -1,0 +1,38 @@
+[main]
+@type = oneshot
+@description = "Mount /dev/shm directory"
+@options = ( env )
+@user = ( root )
+@depends =( mount-dev )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [mount-shm] starts... }
+	foreground
+	{
+		if -n { s6-test -d /dev/shm }
+		s6-mkdir -p -m 0755 /dev/shm
+	}
+	foreground {
+		if -tn { mountpoint -q /dev/shm } 
+		execl-cmdline -s { s6-mount ${cmd_args} } 
+	}   
+	66-echo -- [mount-shm] started successfully 
+)
+
+[stop]
+@build=auto
+@execute=
+(
+	if -t { mountpoint -q /dev/shm }
+	foreground {
+		if { 66-echo -- [mount-shm] stops... }
+		if { umount /dev/shm }
+		66-echo -- [mount-shm] stopped successfully
+	}
+)
+
+[environment]
+cmd_args=!-o mode=1777,nosuid,nodev -t tmpfs shm /dev/shm

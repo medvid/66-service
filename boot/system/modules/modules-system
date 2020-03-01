@@ -1,0 +1,20 @@
+[main]
+@type = oneshot
+@description = "Load modules from modules-load directories"
+@user = ( root )
+@options = ( env )
+@depends = ( 00 )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [modules-system] starts... }
+	foreground { ${script_file} }
+	importas -u ? ?
+	if { test ${?} == 0 }  
+	66-echo -- [modules-system] started successfully
+)
+
+[environment]
+script_file=!/usr/lib/66/scripts/modules.sh

@@ -1,0 +1,43 @@
+[main]
+@type = oneshot
+@description = "Restore iptables rules"
+@depends = ( mount-rw )
+@user = ( root )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${IPTABLES} = yes }
+	{ 
+		if { 66-echo -- [local-iptables] starts... }
+		if { s6-test -e ${script_conf} }
+		if { 66-which -q iptables-restore }
+		if { iptables-restore ${script_conf} }
+		66-echo -- [local-iptables] started successfully
+	}
+	66-echo -- [local-iptables] deactivated
+)
+
+[stop]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${IPTABLES} = yes }
+	{ 
+		if { 66-echo -- [system-iptables] stops... }
+		if { s6-test -x ${script_file} }
+		if { ${script_file}	}
+		66-echo -- [local-iptables] stopped successfully
+	}
+	66-echo -- [local-iptables] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf
+script_conf=!/etc/iptables/iptables.rules
+script_file=!/usr/lib/iptables/scripts/iptables-flush
+

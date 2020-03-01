@@ -1,0 +1,12 @@
+[main]
+@type = bundle
+@description = "Active specific devices"
+@user = ( root )
+@contents = 
+(
+devices-dmraid
+devices-btrfs
+devices-crypttab
+devices-lvm
+devices-zfs
+)

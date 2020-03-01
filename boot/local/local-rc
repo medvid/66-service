@@ -1,0 +1,33 @@
+[main]
+@type = oneshot
+@description = "Run rc.local script"
+@options = ( env )
+@user = ( root )
+@depends = (
+	mount-rw
+	local-iptables
+	local-ip6tables
+	local-loop
+	local-time
+	local-authfiles
+	local-tmpfiles )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test $LOCAL = yes }
+	{ 
+		if { 66-echo -- [local-rc] starts... }
+		foreground { ${script_file} }
+		importas ? ?
+		if { test ${?} == 0 } 
+		66-echo -- [local-rc] started successfully
+	}
+	66-echo -- [local-rc] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf
+script_file=!/etc/66/rc.local

@@ -1,0 +1,23 @@
+[main]
+@type = oneshot
+@description = "Launch all tree enabled of root user"
+@user = ( root )
+@depends = ( all-Mount all-System all-Local )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = ( 
+execl-envfile ${conf_file}
+66-all -v${VERBOSITY} -l ${LIVE} up
+)
+
+[stop]
+@build = auto
+@execute = (
+execl-envfile ${conf_file}
+66-all -v${VERBOSITY} -l ${LIVE} down
+)
+
+[environment]
+conf_file=!/etc/66/init.conf

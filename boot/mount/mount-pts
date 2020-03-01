@@ -1,0 +1,38 @@
+[main]
+@type = oneshot
+@description = "Mount /dev/pts directory"
+@options = ( env )
+@user = ( root )
+@depends =( mount-dev )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [mount-pts] starts... }
+	foreground
+	{
+		if -n { s6-test -d /dev/pts }
+		s6-mkdir -p -m 0755 /dev/pts
+	}
+	foreground {
+		if -tn { mountpoint -q /dev/pts }
+		execl-cmdline -s { s6-mount ${cmd_args} }
+	}
+	66-echo -- [mount-pts] started successfully
+)
+
+[stop]
+@build=auto
+@execute=
+(
+	if -t { mountpoint -q /dev/pts }
+	foreground {
+		if { 66-echo -- [mount-pts] stops... }
+		if { umount /dev/pts }
+		66-echo -- [mount-pts] stopped successfully
+	}
+)
+
+[environment]
+cmd_args=!-o mode=0620,gid=5,nosuid,noexec -t devpts devpts /dev/pts

@@ -1,0 +1,24 @@
+[main]
+@type = oneshot
+@description = "Mount zfs devices"
+@user = ( root )
+@depends = ( mount-dev )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${ZFS} = yes }
+	{
+		if { 66-echo -- [devices-zfs] starts... }
+		if { 66-which -q zfs }
+		if { zpool import -a }
+		66-echo -- [devices-zfs] started successfully
+	}
+	66-echo -- [devices-zfs] deactivated		
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

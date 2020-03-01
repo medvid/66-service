@@ -1,0 +1,18 @@
+[main]
+@type = oneshot
+@description = "remount rw '/' directory"
+@options = ( env )
+@user = ( root )
+@depends = ( all-System )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [mount-rw] starts... }
+	if { execl-cmdline -s { s6-mount ${cmd_args} } }
+	66-echo -- [mount-rw] started successfully
+)
+
+[environment]
+cmd_args=!-o remount,rw / /

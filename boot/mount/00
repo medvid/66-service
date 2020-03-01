@@ -1,0 +1,19 @@
+[main]
+@type = bundle
+@description = "Set the hostname and mount filesystem"
+@user = ( root )
+@contents = ( 
+system-hostname
+mount-run
+populate-run
+mount-tmp
+populate-tmp
+mount-proc
+mount-sys
+populate-sys
+mount-dev
+mount-pts
+mount-shm
+populate-dev
+mount-cgroups
+)

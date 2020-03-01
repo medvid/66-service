@@ -1,0 +1,42 @@
+[main]
+@type = oneshot
+@description = "Restore ip6tables rules"
+@depends = ( mount-rw )
+@user = ( root )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${IP6TABLES} = yes }
+	{ 
+		if { 66-echo -- [local-iptables] starts... }
+		if { s6-test -e ${script_conf} }
+		if { 66-which -q ip6tables-restore }
+		if { ip6tables-restore ${script_conf} }
+		66-echo -- [local-ip6tables] started successfully
+	}
+	66-echo -- [local-ip6tables] deactivated
+)
+
+[stop]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${IP6TABLES} = yes }
+	{ 
+		if { 66-echo -- [local-ip6tables] stops... }
+		if { s6-test -x ${script_file} }
+		if { ${script_file}	}
+		66-echo -- [local-ip6tables] stopped successfully
+	}
+	66-echo -- [local-ip6tables] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf
+script_conf=!/etc/iptables/ip6tables.rules
+script_file=!/usr/lib/iptables/scripts/ip6tables-flush

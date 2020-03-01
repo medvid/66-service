@@ -1,0 +1,32 @@
+[main]
+@type = oneshot
+@description = "Mount /tmp directory"
+@options = ( env )
+@user = ( root )
+
+[start]
+@build = auto
+@execute = 
+(
+	if -tn { mountpoint -q /tmp }
+	foreground {
+		if { 66-echo -- [mount-tmp] starts... } 
+		if { execl-cmdline -s { s6-mount ${cmd_args} } } 
+		66-echo -- [mount-tmp] started successfully
+	}
+)
+
+[stop]
+@build=auto
+@execute=
+(
+	if -t { mountpoint -q /tmp }
+	foreground {
+		if { 66-echo -- [mount-tmp] stops... }
+		if { umount /tmp }
+		66-echo -- [mount-tmp] stopped successfully
+	}
+)
+
+[environment]
+cmd_args=!-o noatime,nodev,nosuid -t tmpfs tmp /tmp

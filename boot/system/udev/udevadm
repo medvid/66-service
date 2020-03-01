@@ -1,0 +1,17 @@
+[main]
+@type = oneshot
+@description = "Launch udevadm"
+@user = ( root )
+@depends=( udevd )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [udevadm] starts... }
+	if { udevadm info --cleanup-db }
+	if { udevadm trigger --action=add --type=subsystems }
+	if { udevadm trigger --action=add --type=devices }
+	if { udevadm settle }
+	66-echo -- [udevadm] started successfully
+)

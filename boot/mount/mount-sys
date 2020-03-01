@@ -1,0 +1,20 @@
+[main]
+@type = oneshot
+@description = "Mount /sys directory"
+@options = ( env )
+@user = ( root )
+@depends = ( mount-proc )
+[start]
+@build = auto
+@execute = 
+(
+	if -tn { mountpoint -q /sys }
+	foreground {
+		if { 66-echo -- [mount-sys] starts... } 
+		if { execl-cmdline -s { s6-mount ${cmd_args} } } 
+		66-echo -- [mount-sys] started successfully
+	}
+)
+
+[environment]
+cmd_args=!-o nosuid,noexec,nodev -t sysfs sys /sys

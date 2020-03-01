@@ -1,0 +1,26 @@
+[main]
+@type = oneshot
+@description = "Saves logs of dmesg"
+@options = ( env )
+@depends = ( local-rc )
+@user = ( root )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [local-dmesg] starts... }
+	foreground {
+		execl-cmdline -s {
+			redirfd -w 1 ${cmd_log}  
+			dmesg ${cmd_args}
+		}
+	}
+	importas ? ?
+	if { test ${?} == 0 } 
+	66-echo -- [local-dmesg] started successfully
+)
+
+[environment]
+cmd_args=!--console-off -T
+cmd_log=!/var/log/dmesg.log

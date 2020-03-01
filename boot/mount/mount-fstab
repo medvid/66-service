@@ -1,0 +1,24 @@
+[main]
+@type = oneshot
+@description = "Mount partition from /etc/fstab file"
+@options = ( env )
+@user = ( root )
+@depends =( system-fsck )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${FSTAB} = yes }
+	{
+		if { 66-echo -- [mount-fstab] starts... }
+		foreground { mount -a }
+		66-echo -- [mount-fstab] started successfully
+	}
+	66-echo -- [mount-fstab] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf
+

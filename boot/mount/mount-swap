@@ -1,0 +1,32 @@
+[main]
+@type = oneshot
+@description = "Mount swap partition"
+@options = ( env )
+@user = ( root )
+@depends=( mount-rw )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${SWAP} = yes }
+	{
+		if { 66-echo -- [mount-swap] starts... }
+		if { swapon -a }
+		66-echo -- [mount-swap] started successfully
+	}
+	66-echo -- [mount-swap] deactivated
+)
+
+[stop]
+@build = auto
+@execute = 
+( 
+	if { 66-echo -- [mount-swap] stops... } 
+	if { swapoff -a }
+	66-echo -- [mount-swap] stopped successfully 
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

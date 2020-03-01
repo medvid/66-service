@@ -1,0 +1,34 @@
+[main]
+@type = oneshot
+@description = "Check filesystem partition"
+@user = ( root )
+@options = ( env )
+@depends = ( all-Mount system-Devices system-fontnkey )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${FORCECHCK} = yes }
+	{
+		redirfd -w 1 /dev/console
+		if { 66-echo -- [system-fsck] FORCECHCK was asked... }
+		execl-cmdline -s { fsck -f ${cmd_args} }
+	}
+	if { 66-echo -- [system-fsck] starts... }
+	foreground { execl-cmdline -s { fsck ${cmd_args} } }
+	importas ? ?
+	ifelse { test $? -gt 1 }
+	{ 
+		if { 66-echo -- fsck reports errors -- at least system should be rebooted }
+		redirfd -w 1 /dev/console
+		66-echo -- fsck reports errors -- at least system should be rebooted
+		
+	}
+	66-echo -- [system-fsck] started successfully
+)
+
+[environment]
+cmd_args=!-A -T -a noopts=_netdev
+conf_file=!/etc/66/boot.conf

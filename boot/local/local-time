@@ -1,0 +1,20 @@
+[main]
+@type = oneshot
+@description = "Set localtime"
+@options = ( env )
+@depends = ( mount-rw )
+@user = ( root )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	if { 66-echo -- [local-time] starts... }
+	if { s6-ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime }
+	66-echo -- [local-time] started successfully
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf
+

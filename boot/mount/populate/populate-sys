@@ -1,0 +1,65 @@
+[main]
+@type = oneshot
+@description = "Populate /sys directory"
+@user = ( root )
+@depends = ( mount-proc mount-sys )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [populate-sys] starts... }
+	
+	foreground {
+		if -t { grep -Fq efivarfs /proc/filesystems }
+		if -nt { mountpoint -q /sys/firmware/efi/efivars }
+		mount -o noatime,nodev,noexec,nosuid,ro -t efivarfs efivars /sys/firmware/efi/efivars
+	}
+	
+	foreground {
+		if -t { grep -Fq fusectl /proc/filesystems }
+		if -nt { mountpoint -q /sys/fs/fuse/connections }
+		mount -o noatime,nodev,noexec,nosuid -t fusectl fusectl /sys/fs/fuse/connections
+	}
+	
+	foreground {
+		if -t { grep -Fq configfs /proc/filesystems }
+		if -nt { mountpoint -q /sys/kernel/config }
+		mount -o noatime,nodev,noexec,nosuid -t configfs configfs /sys/kernel/config
+	}
+	foreground {
+		if -t { grep -Fq debugfs /proc/filesystems }
+		if -nt { mountpoint -q /sys/kernel/debug }
+		mount -o noatime,nodev,noexec,nosuid -t debugfs debugfs /sys/kernel/debug
+	}
+	foreground {
+		if -t { grep -Fq tracefs /proc/filesystems }
+		if -nt { mountpoint -q /sys/kernel/debug/tracing }
+		mount -o noatime,nodev,noexec,nosuid -t tracefs tracefs /sys/kernel/debug/tracing
+	}
+	foreground {
+		if -t { grep -Fq securityfs /proc/filesystems }
+		if -nt { mountpoint -q /sys/kernel/security }
+		mount -o noatime,nodev,noexec,nosuid -t securityfs securityfs /sys/kernel/security
+	}
+	66-echo -- [populate-sys] started successfully
+)
+
+[stop]
+@build = auto
+@execute =
+(
+	if { 66-echo -- [populate-sys] stops... }
+	foreground {
+		forx -p dir { 
+			/sys/firmware/efi/efivars /sys/fs/fuse/connections /sys/kernel/config
+			/sys/kernel/debug /sys/kernel/tracing /sys/kernel/security 
+		}
+		importas -ui dir dir
+		foreground {
+			if -t { mountpoint -q ${dir} }
+			umount ${dir}
+		}
+	}
+	66-echo -- [populate-sys] stopped successfully
+)

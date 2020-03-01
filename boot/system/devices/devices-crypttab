@@ -1,0 +1,31 @@
+[main]
+@type = oneshot
+@description = "Active encrypted devices"
+@user = ( root )
+@options = ( env )
+@depends = ( udevadm )
+
+[start]
+@build = auto
+@execute = (
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${CRYPTTAB} = yes }
+	{
+		if { 66-echo -- [devices-crypttab] starts... }
+		if { s6-test -e ${script_conf} }
+		if { execl-cmdline -s { 66-olexec awk -f ${script_file} ${script_conf} } }
+		foreground {
+			if { 66-which -q vgchange }
+			if { 66-echo -- [devices-crypttab] Lvm detected }
+			if { vgchange --sysinit -a y }
+			66-echo -- [devices-crypttab] Lvm actived successfully
+		}
+		66-echo -- [devices-crypttab] started successfully
+	}
+	66-echo -- [devices-crypttab] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf
+script_file=!/usr/lib/66/scripts/crypt.awk
+script_conf=!/etc/crypttab

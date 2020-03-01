@@ -1,0 +1,18 @@
+[main]
+@type = bundle
+@description = "System configuration"
+@user = ( root )
+@contents = 
+(
+system-hwclock
+modules-kernel
+system-random
+modules-system
+system-sysctl
+udevd
+udevadm
+system-fontnkey
+system-Devices
+system-fsck
+mount-fstab
+)

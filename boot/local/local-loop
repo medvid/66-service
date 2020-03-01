@@ -1,0 +1,16 @@
+[main]
+@type = oneshot
+@description = "Active loop devices"
+@depends = ( mount-rw local-iptables local-ip6tables )
+@user = ( root )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [local-loop] starts... }
+	if { ip link set up dev lo }
+	66-echo -- [local-loop] started successfully
+)
+
+

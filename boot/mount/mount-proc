@@ -1,0 +1,20 @@
+[main]
+@type = oneshot
+@description = "Mount /proc directory"
+@options = ( env )
+@user = ( root )
+
+[start]
+@build = auto
+@execute = 
+(
+	if -tn { mountpoint -q /proc }
+	foreground {
+		if { 66-echo -- [mount-proc] starts... }
+		if { execl-cmdline -s { s6-mount ${cmd_args} } }
+		66-echo -- [mount-proc] started successfully
+	}
+)
+
+[environment]
+cmd_args=!-o nosuid,noexec,nodev -t proc proc /proc

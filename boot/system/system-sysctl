@@ -1,0 +1,26 @@
+[main]
+@type = oneshot
+@description = "Apply sysctl configuration file"
+@user = ( root )
+@options = ( env )
+@depends = ( 00 )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${SYSCTL} = yes }
+	{ 
+		if { 66-echo -- [system-sysctl] starts... }
+		if { 66-which -q sysctl }
+		foreground { sysctl -p }
+		importas ? ?
+		if { test ${?} == 0 } 
+		66-echo -- [system-sysctl] started successfully
+	}
+	66-echo -- [system-sysctl] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

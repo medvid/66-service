@@ -1,0 +1,36 @@
+[main]
+@type = oneshot
+@description = "Create random seed"
+@user = ( root )
+@depends = ( 00 )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [system-random] starts... }
+	if -t { test -r /var/lib/random-seed }
+	foreground {
+	    redirfd -w 1 /dev/urandom
+	    cat /var/lib/random-seed
+	}
+	66-echo -- [system-random] started successfully
+
+)
+
+[stop]
+@build=auto
+@execute=
+(
+	if { 66-echo -- [system-random] stops... }
+	umask 0077
+	backtick -nD "512" -- bytes {
+		cat /proc/sys/kernel/random/poolsize
+	}
+	importas -iu bytes bytes
+	foreground {
+		dd if=/dev/urandom of=/var/lib/random-seed count=1 bs=${bytes} status=none
+	}
+	66-echo -- [system-random] stopped successfully
+
+)

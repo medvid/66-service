@@ -1,0 +1,8 @@
+[main]
+@type = classic
+@description = "Launch tty12"
+@user = ( root )
+
+[start]
+@build = auto
+@execute = ( agetty --delay 2 -J 38400 tty12 )

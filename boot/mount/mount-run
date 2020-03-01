@@ -1,0 +1,20 @@
+[main]
+@type = oneshot
+@description = "Mount /run directory"
+@options = ( env )
+@user = ( root )
+
+[start]
+@build = auto
+@execute = 
+(
+	if -tn { mountpoint -q /run }
+	foreground {
+		if { 66-echo -- [mount-run] starts... } 
+		if { execl-cmdline -s { s6-mount ${cmd_args} } } 
+		66-echo -- [mount-run] started successfully
+	}
+)
+
+[environment]
+cmd_args=!-o mode=0755,nosuid,nodev -t tmpfs run /run

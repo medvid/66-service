@@ -1,0 +1,23 @@
+[main]
+@type = oneshot
+@description = "Active btrfs devices"
+@user = ( root )
+@options = ( env )
+@depends = ( udevadm )
+
+[start]
+@build = auto
+@execute = (
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${BTRFS} = yes }
+	{
+		if { 66-echo -- [devices-btrfs] starts... }
+		if { 66-which -q btrfs }
+		if { btrfs device scan }
+		66-echo -- [devices-btrfs] started successfully
+	}
+	66-echo -- [devices-btrfs] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

@@ -1,0 +1,33 @@
+[main]
+@type = oneshot
+@description = "Active lvm devices"
+@user = ( root )
+@options = ( env )
+@depends = ( udevadm )
+
+[start]
+@build = auto
+@execute = 
+(
+	execl-envfile ${conf_file}
+	ifelse -X { s6-test ${LVM} = yes }
+	{
+		if { 66-echo -- [devices-lvm] starts... }
+		if { 66-which -q lvmetad }
+		foreground {
+			if -nt { s6-test -d /run/lvm } 
+			s6-mkdir /run/lvm
+		}
+		if { lvmetad -p /run/lvm/lvmetad.pid }
+		if { 66-which -q vgchange }
+		foreground {
+			vgchange --sysinit -ay
+		}
+		foreground { pkill lvmetad }
+		66-echo -- [devices-lvm] started successfully
+	}
+	66-echo -- [devices-lvm] deactivated
+)
+
+[environment]
+conf_file=!/etc/66/boot.conf

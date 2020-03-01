@@ -1,0 +1,19 @@
+[main]
+@type = oneshot
+@description = "Create tempory files"
+@depends = ( mount-rw )
+@user = ( root )
+@options = ( env )
+
+[start]
+@build = auto
+@execute = 
+(
+	if { 66-echo -- [local-tmpfiles] starts... }
+	if { execl-cmdline -s { ${script_file} ${script_args} } }
+	66-echo -- [local-tmpfiles] started successfully
+)
+
+[environment]
+script_file=!/usr/lib/66/scripts/tmpfiles.sh
+script_args=!--create --verbose

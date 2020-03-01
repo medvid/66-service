@@ -1,0 +1,21 @@
+[main]
+@type = oneshot
+@description = "Mount /dev directory"
+@options = ( env )
+@user = ( root )
+@depends = ( mount-sys )
+
+[start]
+@build = auto
+@execute = 
+(
+	if -tn { mountpoint -q /dev }
+	foreground {
+		if { 66-echo -- [mount-dev] starts... } 
+		if { execl-cmdline -s { s6-mount ${cmd_args} } } 
+		66-echo -- [mount-dev] started successfully
+	}
+)
+
+[environment]
+cmd_args=!-o mode=0755,nosuid -t devtmpfs dev /dev
