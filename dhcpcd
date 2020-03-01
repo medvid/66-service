@@ -1,0 +1,23 @@
+[main]
+@type = classic
+@description = "dhcpcd daemon"
+@user = ( root )
+@options = ( log env )
+
+[start]
+@build = auto
+@execute = ( execl-cmdline -s { dhcpcd ${cmd_args} -f ${conf_dir}/${conf_file} } )
+
+[stop]
+@build = auto
+@execute = ( execl-cmdline -s { dhcpcd ${cmd_args_stop} } )
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+cmd_args=!-B
+cmd_args_stop=!-x
+conf_dir=!/etc
+conf_file=!dhcpcd.conf

@@ -1,0 +1,21 @@
+[main]
+@type = classic
+@name = docker
+@description = "dockerd service"
+@options = ( log )
+@user = (root)
+@maxdeath = 3
+
+[start]
+@build = auto
+
+@execute =
+(
+s6-ipcserver-socketbinder -a 0660 -- /run/docker.sock
+if { chown root:docker /run/docker.sock }
+dockerd -H unix:///run/docker.sock
+)
+
+[logger]
+@build = auto
+@timestamp = iso

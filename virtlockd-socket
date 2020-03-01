@@ -1,0 +1,16 @@
+[main]
+@type = oneshot
+@description = "Virtual machine lock manager socket"
+@user = (root)
+
+[start]
+@build = auto
+@execute = (
+foreground
+{
+    if -nt { s6-test -d /run/libvirt }
+    s6-mkdir -p -m 0755 /run/libvirt
+}
+s6-ipcserver-socketbinder -a 0600 -- /run/libvirt/virtlockd-sock
+true
+)

@@ -1,0 +1,20 @@
+[main]
+@type = classic
+@description = "ssh daemon"
+@user = ( root )
+@options = ( log env )
+
+[start]
+@build = auto
+@execute = (
+foreground { exec ssh-keygen -A }
+execl-cmdline -s { /usr/bin/sshd -f ${conf_file} ${cmd_args} }
+)
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+conf_file=!/etc/ssh/sshd_config
+cmd_args=!-D

@@ -1,0 +1,14 @@
+[main]
+@type = longrun
+@description = "Virtualization daemon"
+@user = ( root )
+@depends = ( dbus virtlockd virtlogd polkitd )
+@options = ( log )
+
+[start]
+@build = auto
+@execute=( libvirtd )
+
+[logger]
+@build = auto
+@timestamp = iso

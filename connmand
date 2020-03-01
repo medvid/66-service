@@ -1,0 +1,17 @@
+[main]
+@type = longrun
+@description = "connman daemon"
+@user = ( root )
+@options = ( log env )
+@depends = ( dbus )
+
+[start]
+@build = auto
+@execute = ( execl-cmdline -s { connmand ${cmd_args} } )
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+cmd_args=!-n --nobacktrace --nodnsproxy

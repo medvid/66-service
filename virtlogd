@@ -1,0 +1,13 @@
+[main]
+@type = longrun
+@description = "Virtual machine log manager"
+@user = ( root )
+@options = ( log )
+
+[start]
+@build = auto
+@execute = ( virtlogd )
+
+[logger]
+@build = auto
+@timestamp = iso

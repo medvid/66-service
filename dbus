@@ -1,0 +1,35 @@
+[main]
+@type = longrun
+@description = "dbus system daemon"
+@user = ( root )
+@maxdeath = 3
+@notify = 4
+@options = ( log env )
+@timeout-up=3000
+
+[start]
+@build = auto
+@execute = (
+foreground {
+    if -nt { s6-test -d ${socket_dir} }
+    s6-mkdir -p -m 0755 ${socket_dir}
+}
+s6-ipcserver-socketbinder -- ${socket_dir}/${socket_name}
+foreground { dbus-uuidgen --ensure }
+execl-cmdline -s { dbus-daemon ${cmd_args} }
+)
+
+[stop]
+@build = auto
+@execute = ( s6-rmrf ${socket_dir}/${socket_name} )
+
+[logger]
+@build = auto
+@backup = 3
+@maxsize = 1000000
+@timestamp = iso
+
+[environment]
+cmd_args=!--system --print-pid=4 --nofork --nopidfile --address=unix:path=/run/dbus/system_bus_socket
+socket_dir=!/run/dbus
+socket_name=!system_bus_socket

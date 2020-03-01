@@ -1,0 +1,35 @@
+[main]
+@type = classic
+@description = "ntpd daemon"
+@user = ( root )
+@options = ( log env )
+
+[start]
+@build = auto
+@execute = (
+foreground
+{
+    if -nt { s6-test -d /var/emtpy }
+    s6-mkdir -p -m 0755 /var/empty
+}
+foreground
+{
+    if -nt { s6-test -d ${socket_dir} }
+    s6-mkdir -p -m 0755 ${socket_dir}
+}
+execl-cmdline -s { ntpd ${cmd_args} -f ${conf_dir}/${conf_file} } )
+
+[stop]
+@build = auto
+@execute = ( s6-rmrf ${socket_dir}/${socket_name} )
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+cmd_args=!-d -s
+conf_dir=!/etc
+conf_file=!ntpd.conf
+socket_dir=!/run/openntpd
+socket_name=!openntpd.sock

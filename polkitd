@@ -1,0 +1,17 @@
+[main]
+@type = longrun
+@description = "polkit daemon"
+@user = ( root )
+@options = ( log env )
+@depends = ( dbus )
+
+[start]
+@build = auto
+@execute = ( execl-cmdline -s { /usr/lib/polkit-1/polkitd ${cmd_args} } )
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+cmd_args=!--no-debug

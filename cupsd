@@ -1,0 +1,16 @@
+[main]
+@type = classic
+@description = "cups daemon"
+@user = ( root )
+@options = ( log env )
+
+[start]
+@build = auto
+@execute = ( execl-cmdline -s { cupsd ${cmd_args} } )
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+cmd_args=!-f

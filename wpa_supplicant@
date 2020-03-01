@@ -1,0 +1,16 @@
+[main]
+@type = classic
+@description = "wpa_supplicant@@I daemon"
+@user = ( root )
+@options = ( log env )
+
+[start]
+@build = auto
+@execute = ( execl-cmdline -s { wpa_supplicant ${cmd_args} } )
+
+[logger]
+@build = auto
+@timestamp = iso
+
+[environment]
+cmd_args=!-Dnl80211 -i @I -c/etc/wpa_supplicant/wpa_supplicant-@I.conf
