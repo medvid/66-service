@@ -1,0 +1,9 @@
+[main]
+@type = oneshot
+@name = xdg-user-dirs
+@description = "Well-know user directory creation"
+@user = ( user )
+
+[start]
+@build = auto
+@execute = ( xdg-user-dirs-update )

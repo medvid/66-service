@@ -1,0 +1,24 @@
+[main]
+@type = longrun
+@description = "Start a scandir for @I"
+@user = ( root )
+@options = ( log )
+@depends = ( mount-run@@I )
+@notify = 3
+@timeout-up = 3000
+
+[start]
+@build = auto
+@runas = vmm
+@execute =
+(
+s6-setsid -qb --
+umask 022
+backtick -n HOME { homeof vmm }
+importas -u HOME HOME
+execl-cmdline -s { 66-scandir -v3 -d3 -cu }
+)
+
+[logger]
+@build = auto
+@timestamp = iso

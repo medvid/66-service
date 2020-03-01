@@ -1,0 +1,17 @@
+[main]
+@type = oneshot
+@description = "Mount /run/user directory of @I"
+@user = (root)
+
+[start]
+@build = auto
+@execute = 
+(
+	## create /run/user/<uid>
+	execl-subuidgid -o @I
+	foreground {
+		if -nt { mountpoint -q /run/user/${UID} }
+		if { mkdir -p /run/user/${UID} }
+		mount -o noatime,nodev,nosuid,gid=${GID},uid=${UID},mode=0700,size=64M -t tmpfs user /run/user/${UID}
+	}
+)
